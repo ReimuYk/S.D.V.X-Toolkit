@@ -20,11 +20,9 @@ def DecompressLSZZ(content):
         if (ctrlLen == 0):
             ctrl = data
             ctrlLen = 8
-##            print(bin(ctrl))#log
             continue
 
         if ((ctrl & 0x01) == 0x01):
-##            print("ctrl & 0x01 : %x"%data)#log
             ret.append(data)
             dect.append(data)
             ctrl = ctrl >> 1
@@ -35,31 +33,22 @@ def DecompressLSZZ(content):
         cmd1 = 0
 
         if not content:
-            print("not content")#log
             break
         else:
             cmd1 = content[0]
             content = content[1:]
-            if not content:
-                print("end of file")#log
 
         chLen = (cmd1 & 0x0f) + 3
         chOff = ((cmd0 & 0xff) << 4) | ((cmd1 & 0xf0) >> 4)
         if (cmd0 & 0xff != cmd0):
-            print("cmd0 mask")#log
-        if ((cmd1&0xf0)>>4 != (cmd1>>4)):
-            print("cmd1 mask")#log
         index = len(dect) - chOff
-##        print("chLen:%d, chOff:%d"%(chLen,chOff),end="\t")#log
+
 
         dest = []
         i = 0
         while (i < chLen):
             if (index >= len(dect)):
                 if (chOff == 0):
-                    print("choff 0")#log
-                    print(chLen)
-                    print(len(ret))
                     break
                 index = len(dect) - chOff
             if (index < 0):
@@ -77,16 +66,26 @@ def DecompressLSZZ(content):
         decSize = 0x1000
         if (len(dect) > decSize):
             dect = dect[len(dect) - decSize + 1 :]
-
-##        print("retlen: %d"%len(ret), end='\t')#log
-##        print(bytes(ret[-chLen:]))#log
-
         
         ctrl = ctrl >> 1
         ctrlLen -= 1
 
     return bytes(ret)
-            
+
+def Raw2Image(raw, h, w):
+    # assert size correct
+    if h*w*4 != len(raw):
+        print("Raw2Image: incorrect size (%d, %d, %d)" % (len(raw), h, w))
+        return
+
+    image = Image.fromarray(np.array([[0]*h]*w)).convert('RGBA')
+    img_arr = np.array(image)
+    for x in range(w):
+        for y in range(h):
+            off = (x * w + y) * 4
+            img_arr[x][y] = [raw[off+2], raw[off+1], raw[off], raw[off+3]]
+
+    return Image.fromarray(img_arr)
 
 def DecodeRaw(raw):
     filesize = len(raw)
@@ -103,6 +102,7 @@ def DecodeRaw(raw):
 
     offset = 0
     if (argbarr[0] == 0x54584454):
+        print("offset 16")
         offset = 16
 
     i2bset = {}
@@ -145,10 +145,11 @@ def CreateImg(argbarr, widths, heights, offset, index):
 begin_time = time.time()
 f = open('./assets/raw','rb')
 raw = DecompressLSZZ(f.read())
-argbarr, w, h, off = DecodeRaw(raw)
+##argbarr, w, h, off = DecodeRaw(raw)
 f.close()
 
-img = CreateImg(argbarr, w, h, off, 7)
+##img = CreateImg(argbarr, w, h, off, 7)
+img = Raw2Image(raw, 722, 722)
 end_time = time.time()
 print("cost: %d"%(end_time-begin_time))
 ##img.show()    
