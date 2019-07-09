@@ -32,7 +32,7 @@ def simple_Image2Raw(image):
 
 def pack_ifs(image):
     # header
-    f = open("./assets/header", "rb")
+    f = open("%s/assets/header"%sys.path[0], "rb")
     header = f.read()
     f.close()
 
@@ -40,12 +40,12 @@ def pack_ifs(image):
     rawdata = simple_Image2Raw(image)
 
     # texturelist.xml
-    f = open("./assets/texturelist.xml", "rb")
+    f = open("%s/assets/texturelist.xml"%sys.path[0], "rb")
     texture = f.read()
     f.close()
 
     # version.xml
-    f = open("./assets/version.xml", "rb")
+    f = open("%s/assets/version.xml"%sys.path[0], "rb")
     version = f.read()
     f.close()
 
