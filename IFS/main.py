@@ -40,7 +40,6 @@ def DecompressLSZZ(content):
 
         chLen = (cmd1 & 0x0f) + 3
         chOff = ((cmd0 & 0xff) << 4) | ((cmd1 & 0xf0) >> 4)
-        if (cmd0 & 0xff != cmd0):
         index = len(dect) - chOff
 
 
