@@ -57,19 +57,32 @@ def OnPaint_2(hwnd, msg, wp, lp):
     win32gui.SetGraphicsMode(dc, win32con.GM_ADVANCED)
     l,t,r,b=win32gui.GetClientRect(hwnd)
     print(l,t,r,b) # for debug
-    
-##    for x in range(1):
-##        vertices=(
-##            {'x':int(random.random()*r), 'y':int(random.random()*b), 'Red':0xff00, 'Green':0, 'Blue':0, 'Alpha':0},
-##            {'x':int(random.random()*r), 'y':int(random.random()*b), 'Red':0xff00, 'Green':0, 'Blue':0, 'Alpha':0},
-##            {'x':int(random.random()*r), 'y':int(random.random()*b), 'Red':0xff00, 'Green':0, 'Blue':0, 'Alpha':0},
-##            )
-##        mesh=((0,1),)
-##        win32gui.GradientFill(dc,vertices, mesh, win32con.GRADIENT_FILL_RECT_H)
-    
-    for vertices in num2vertices(display_value%10):
+
+    # 1st num
+    val1 = display_value // 1000
+    off_x1 = off_x
+    for vertices in num2vertices(val1, off_x1, off_y):
         mesh=((0,1),)
         win32gui.GradientFill(dc,vertices, mesh, win32con.GRADIENT_FILL_RECT_H)
+    # 2st num
+    val2 = (display_value // 100) % 10
+    off_x2 = off_x + (2*num_w + num_spa) + (off_padding)
+    for vertices in num2vertices(val2, off_x2, off_y):
+        mesh=((0,1),)
+        win32gui.GradientFill(dc,vertices, mesh, win32con.GRADIENT_FILL_RECT_H)
+    # 1st num
+    val3 = (display_value // 10) % 10
+    off_x3 = off_x + (4*num_w + 2*num_spa) + (2*off_padding)
+    for vertices in num2vertices(val3, off_x3, off_y):
+        mesh=((0,1),)
+        win32gui.GradientFill(dc,vertices, mesh, win32con.GRADIENT_FILL_RECT_H)
+    # 1st num
+    val4 = display_value % 10
+    off_x4 = off_x + (6*num_w + 3*num_spa) + (3*off_padding)
+    for vertices in num2vertices(val4, off_x4, off_y):
+        mesh=((0,1),)
+        win32gui.GradientFill(dc,vertices, mesh, win32con.GRADIENT_FILL_RECT_H)
+        
     win32gui.EndPaint(hwnd, ps)
     return 0
 wndproc_2={win32con.WM_PAINT:OnPaint_2}
