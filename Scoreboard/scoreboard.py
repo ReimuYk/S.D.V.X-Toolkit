@@ -64,19 +64,19 @@ def OnPaint_2(hwnd, msg, wp, lp):
     for vertices in num2vertices(val1, off_x1, off_y):
         mesh=((0,1),)
         win32gui.GradientFill(dc,vertices, mesh, win32con.GRADIENT_FILL_RECT_H)
-    # 2st num
+    # 2nd num
     val2 = (display_value // 100) % 10
     off_x2 = off_x + (2*num_w + num_spa) + (off_padding)
     for vertices in num2vertices(val2, off_x2, off_y):
         mesh=((0,1),)
         win32gui.GradientFill(dc,vertices, mesh, win32con.GRADIENT_FILL_RECT_H)
-    # 1st num
+    # 3rd num
     val3 = (display_value // 10) % 10
     off_x3 = off_x + (4*num_w + 2*num_spa) + (2*off_padding)
     for vertices in num2vertices(val3, off_x3, off_y):
         mesh=((0,1),)
         win32gui.GradientFill(dc,vertices, mesh, win32con.GRADIENT_FILL_RECT_H)
-    # 1st num
+    # 4th num
     val4 = display_value % 10
     off_x4 = off_x + (6*num_w + 3*num_spa) + (3*off_padding)
     for vertices in num2vertices(val4, off_x4, off_y):
