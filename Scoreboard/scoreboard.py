@@ -174,10 +174,17 @@ def run():
     win32gui.SetWindowPos(hwnd, win32con.HWND_TOPMOST, 0, 0, 0, 0, win32con.SWP_NOMOVE | win32con.SWP_NOSIZE)
 
     process_init()
+    old_display_value = None
     while True:
         time.sleep(refresh_rate)
-        update_display_value()
-        win32gui.InvalidateRect(hwnd, None, True)
+        try:
+            update_display_value()
+        except:
+            time.sleep(0) # for lazy init
+            process_init()
+        if display_value != old_display_value:
+            win32gui.InvalidateRect(hwnd, None, True)
         win32gui.PumpWaitingMessages()
+        old_display_value = display_value
 
 run()
