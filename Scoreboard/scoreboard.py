@@ -202,5 +202,7 @@ def run():
             win32gui.InvalidateRect(hwnd, None, True)
         win32gui.PumpWaitingMessages()
         old_display_value = display_value
+        if not win32gui.GetWindowText(hwnd):
+            exit()
 
 run()
