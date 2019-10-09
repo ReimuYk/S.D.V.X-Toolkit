@@ -6,7 +6,7 @@ import win32process
 import ctypes
 
 # global value
-display_value = 9876
+display_value = None
 DLL = ctypes.windll.LoadLibrary(".\\kernel32.dll")
 PROCESS = None
 total_notes = 0
@@ -30,6 +30,9 @@ off_y = config_json["off_y"]
 off_padding = config_json["off_padding"]
 alpha_level = config_json["alpha_level"]
 refresh_rate = config_json["refresh_rate"]
+headless = config_json["headless"]
+pos_x = config_json["pos_x"]
+pos_y = config_json["pos_y"]
 
 
 # pre-calculated
@@ -40,8 +43,8 @@ num_xy = [{'x0':0,              'y0':0,                 'x1':2*num_w+num_spa,   
           {'x0':0,              'y0':num_w+num_spa,     'x1':num_w,             'y1':3*num_w+2*num_spa},
           {'x0':num_w+num_spa,  'y0':num_w+num_spa,     'x1':2*num_w+num_spa,   'y1':3*num_w+2*num_spa},
           {'x0':0,              'y0':2*num_w+2*num_spa, 'x1':2*num_w+num_spa,   'y1':3*num_w+2*num_spa}]
-window_width = (2*off_x) + (8*num_w + 4*num_spa) + (3*off_padding) + 16
-window_height = (2*off_y) + (3*num_w + 2*num_spa) + 39
+window_width = (2*off_x) + (8*num_w + 4*num_spa) + (3*off_padding) + (16 if not headless else 0)
+window_height = (2*off_y) + (3*num_w + 2*num_spa) + (39 if not headless else 0)
 
 def OnPaint_2(hwnd, msg, wp, lp):
     global display_value
@@ -78,25 +81,25 @@ def OnPaint_2(hwnd, msg, wp, lp):
     l,t,r,b=win32gui.GetClientRect(hwnd)
 
     # 1st num
-    val1 = display_value // 1000
+    val1 = display_value // 1000 if display_value else 10
     off_x1 = off_x
     for vertices in num2vertices(val1, off_x1, off_y):
         mesh=((0,1),)
         win32gui.GradientFill(dc,vertices, mesh, win32con.GRADIENT_FILL_RECT_H)
     # 2nd num
-    val2 = (display_value // 100) % 10
+    val2 = (display_value // 100) % 10 if display_value else 10
     off_x2 = off_x + (2*num_w + num_spa) + (off_padding)
     for vertices in num2vertices(val2, off_x2, off_y):
         mesh=((0,1),)
         win32gui.GradientFill(dc,vertices, mesh, win32con.GRADIENT_FILL_RECT_H)
     # 3rd num
-    val3 = (display_value // 10) % 10
+    val3 = (display_value // 10) % 10 if display_value else 10
     off_x3 = off_x + (4*num_w + 2*num_spa) + (2*off_padding)
     for vertices in num2vertices(val3, off_x3, off_y):
         mesh=((0,1),)
         win32gui.GradientFill(dc,vertices, mesh, win32con.GRADIENT_FILL_RECT_H)
     # 4th num
-    val4 = display_value % 10
+    val4 = display_value % 10 if display_value else 10
     off_x4 = off_x + (6*num_w + 3*num_spa) + (3*off_padding)
     for vertices in num2vertices(val4, off_x4, off_y):
         mesh=((0,1),)
@@ -107,7 +110,7 @@ def OnPaint_2(hwnd, msg, wp, lp):
 wndproc_2={win32con.WM_PAINT:OnPaint_2}
 
 def process_init():
-    global PROCESS
+    global PROCESS, display_value
     HANDLE = win32gui.FindWindow(None,'SOUND VOLTEX IV HEAVENLY HAVEN 1')
     if HANDLE==0:
         print("Warning: PROCESS NOT AVAILABLE")
@@ -116,6 +119,7 @@ def process_init():
     PROCESS = win32api.OpenProcess(win32con.PROCESS_VM_READ|
                                    win32con.PROCESS_VM_WRITE|
                                    win32con.PROCESS_VM_OPERATION,True,pid)
+    display_value = 0
 
 def VMREAD(addr):
     base = ctypes.c_int()
@@ -164,14 +168,25 @@ def run():
     wc.style =  win32con.CS_GLOBALCLASS|win32con.CS_VREDRAW | win32con.CS_HREDRAW
     wc.hbrBackground = win32con.COLOR_WINDOW+1
     wc.lpfnWndProc=wndproc_2
-    class_atom=win32gui.RegisterClass(wc)       
+    class_atom=win32gui.RegisterClass(wc)
+
+    # window features
+    win_features = win32con.WS_CLIPCHILDREN|win32con.WS_CLIPSIBLINGS|win32con.WS_POPUP|win32con.WS_VISIBLE if headless \
+                   else win32con.WS_CAPTION|win32con.WS_VISIBLE|win32con.WS_THICKFRAME|win32con.WS_SYSMENU|win32con.WS_POPUP
+    
     hwnd = win32gui.CreateWindowEx(0, class_atom,'SDVX-Scoreboard',
-        win32con.WS_CAPTION|win32con.WS_VISIBLE|win32con.WS_THICKFRAME|win32con.WS_SYSMENU,
+        win_features,
         100,100,window_width,window_height, 0, 0, 0, None)
+
+    # layered window
     s=win32gui.GetWindowLong(hwnd,win32con.GWL_EXSTYLE)
     win32gui.SetWindowLong(hwnd, win32con.GWL_EXSTYLE, s|win32con.WS_EX_LAYERED)
     win32gui.SetLayeredWindowAttributes(hwnd, 0, alpha_level, win32con.LWA_ALPHA)
-    win32gui.SetWindowPos(hwnd, win32con.HWND_TOPMOST, 0, 0, 0, 0, win32con.SWP_NOMOVE | win32con.SWP_NOSIZE)
+
+    # always TOPMOST and set position
+    win_x = 100 if pos_x == -1 else pos_x
+    win_y = 100 if pos_y == -1 else pos_y
+    win32gui.SetWindowPos(hwnd, win32con.HWND_TOPMOST, win_x, win_y, 0, 0, win32con.SWP_SHOWWINDOW | win32con.SWP_NOSIZE)
 
     process_init()
     old_display_value = None
@@ -181,6 +196,7 @@ def run():
             update_display_value()
         except:
             time.sleep(0) # for lazy init
+            display_value = None
             process_init()
         if display_value != old_display_value:
             win32gui.InvalidateRect(hwnd, None, True)
