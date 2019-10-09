@@ -16,12 +16,12 @@ near_note = 0
 error_note = 0
 
 # config values
-num_spa = 70
-num_w = 20
-off_x = 30
-off_y = 30
+num_spa = 10
+num_w = 5
+off_x = 3
+off_y = 3
 off_padding = 10
-alpha_level = 60
+alpha_level = 200
 score_addr = 0x18810EF8
 critical_addr = 0x18810F0C
 near_addr = 0x18810F10
@@ -129,6 +129,7 @@ def update_display_value():
     # new play count when score decreases
     if t_score < score:
         dispaly_value = 9999
+        score = 0
         total_notes = 0
         critical_note = 0
         near_note = 0
