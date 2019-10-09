@@ -203,6 +203,6 @@ def run():
         win32gui.PumpWaitingMessages()
         old_display_value = display_value
         if not win32gui.GetWindowText(hwnd):
-            exit()
+            return
 
 run()
