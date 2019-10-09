@@ -1,0 +1,16 @@
+{
+  "?num_spa" : "数字大小，这个尺寸的含义是8中间那两个正方形的边长",
+  "num_spa"  : 10,
+  "?num_w" : "数字的边的粗细",
+  "num_w"  : 5,
+  "?off_x" : "第一个数字距离左边缘的尺寸",
+  "off_x"  : 3,
+  "?off_y" : "第一个数字距离上边缘的尺寸",
+  "off_y" : 3,
+  "?off_padding" : "两个数字之间的间隔",
+  "off_padding"  : 10,
+  "?alpha_level" : "不透明度，0-255，0为全透明",
+  "alpha_level"  : 200,
+  "?refresh_rate" : "每X秒刷新一次数据",
+  "refresh_rate"  : 0.2
+}

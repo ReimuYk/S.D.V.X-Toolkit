@@ -16,16 +16,21 @@ near_note = 0
 error_note = 0
 
 # config values
-num_spa = 10
-num_w = 5
-off_x = 3
-off_y = 3
-off_padding = 10
-alpha_level = 200
 score_addr = 0x18810EF8
 critical_addr = 0x18810F0C
 near_addr = 0x18810F10
 error_addr = 0x18810F14
+config_json = None
+with open("config.json", "r") as f:
+    config_json = eval(f.read())
+num_spa = config_json["num_spa"]
+num_w = config_json["num_w"]
+off_x = config_json["off_x"]
+off_y = config_json["off_y"]
+off_padding = config_json["off_padding"]
+alpha_level = config_json["alpha_level"]
+refresh_rate = config_json["refresh_rate"]
+
 
 # pre-calculated
 num_xy = [{'x0':0,              'y0':0,                 'x1':2*num_w+num_spa,   'y1':num_w},
@@ -115,8 +120,6 @@ def process_init():
 def VMREAD(addr):
     base = ctypes.c_int()
     DLL.ReadProcessMemory(int(PROCESS),addr,ctypes.byref(base),4,None)
-##    print("0x%X"%addr,end='\t')
-##    print(base)
     return base.value
 
 def update_display_value():
@@ -172,7 +175,7 @@ def run():
 
     process_init()
     while True:
-        time.sleep(0.2)
+        time.sleep(refresh_rate)
         update_display_value()
         win32gui.InvalidateRect(hwnd, None, True)
         win32gui.PumpWaitingMessages()
